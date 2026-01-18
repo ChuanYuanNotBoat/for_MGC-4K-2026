@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MGC 4K 2026 分数计算器</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #1a1a2e;
+            color: #e6e6e6;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: #16213e;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #0f3460 0%, #1a1a2e 100%);
+            color: white;
+            padding: 25px 30px;
+            text-align: center;
+            border-bottom: 3px solid #00adb5;
+        }
+        
+        h1 {
+            margin: 0 0 10px 0;
+            font-size: 32px;
+            color: #00adb5;
+        }
+        
+        .subtitle {
+            font-size: 18px;
+            opacity: 0.9;
+            margin-bottom: 5px;
+            color: #eeeeee;
+        }
+        
+        .mgc-badge {
+            display: inline-block;
+            background: linear-gradient(45deg, #ff5722, #ff9800);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            margin-top: 10px;
+            letter-spacing: 1px;
+        }
+        
+        .instructions {
+            background-color: rgba(0, 173, 181, 0.1);
+            border-left: 4px solid #00adb5;
+            padding: 20px;
+            margin: 20px 30px;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+        
+        .instructions h3 {
+            margin-top: 0;
+            color: #00adb5;
+        }
+        
+        .instructions ul {
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+        }
+        
+        .table-container {
+            padding: 20px 30px;
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 850px;
+        }
+        
+        th {
+            background-color: #0f3460;
+            padding: 16px 12px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #00adb5;
+            position: sticky;
+            top: 0;
+            color: #eeeeee;
+        }
+        
+        td {
+            padding: 14px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        tr:hover {
+            background-color: rgba(15, 52, 96, 0.3);
+        }
+        
+        input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #393e46;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.3s;
+            background-color: #222831;
+            color: #eeeeee;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #00adb5;
+            box-shadow: 0 0 0 3px rgba(0, 173, 181, 0.2);
+        }
+        
+        input::placeholder {
+            color: #888;
+        }
+        
+        .output-cell {
+            background-color: rgba(15, 52, 96, 0.2);
+            font-weight: 500;
+            color: #00adb5;
+        }
+        
+        .result {
+            font-weight: 700;
+            color: #ff9800;
+            font-size: 16px;
+        }
+        
+        .row-header {
+            background-color: rgba(15, 52, 96, 0.3);
+            font-weight: 600;
+            width: 60px;
+            text-align: center;
+        }
+        
+        .controls {
+            padding: 25px 30px;
+            display: flex;
+            gap: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        button i {
+            font-size: 18px;
+        }
+        
+        .calculate-btn {
+            background: linear-gradient(135deg, #00adb5, #0097a7);
+            color: white;
+        }
+        
+        .calculate-btn:hover {
+            background: linear-gradient(135deg, #0097a7, #00838f);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 173, 181, 0.4);
+        }
+        
+        .add-row-btn {
+            background: linear-gradient(135deg, #4CAF50, #388E3C);
+            color: white;
+        }
+        
+        .add-row-btn:hover {
+            background: linear-gradient(135deg, #388E3C, #2E7D32);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+        }
+        
+        .clear-btn {
+            background-color: #393e46;
+            color: #eeeeee;
+            border: 1px solid #555;
+        }
+        
+        .clear-btn:hover {
+            background-color: #555;
+            transform: translateY(-3px);
+        }
+        
+        .delete-btn {
+            background-color: #ff5722;
+            color: white;
+            padding: 6px 12px;
+            font-size: 13px;
+            border-radius: 5px;
+        }
+        
+        .delete-btn:hover {
+            background-color: #f4511e;
+        }
+        
+        .export-btn {
+            background: linear-gradient(135deg, #9C27B0, #7B1FA2);
+            color: white;
+        }
+        
+        .export-btn:hover {
+            background: linear-gradient(135deg, #7B1FA2, #6A1B9A);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(156, 39, 176, 0.4);
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #888;
+            font-size: 14px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .formula-section {
+            background-color: rgba(0, 0, 0, 0.2);
+            padding: 20px 30px;
+            margin: 20px 30px;
+            border-radius: 10px;
+            border: 1px solid rgba(0, 173, 181, 0.3);
+        }
+        
+        .formula-section h3 {
+            margin-top: 0;
+            color: #ff9800;
+            border-bottom: 2px solid rgba(255, 152, 0, 0.3);
+            padding-bottom: 10px;
+        }
+        
+        .formula {
+            background-color: rgba(34, 40, 49, 0.8);
+            padding: 18px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-family: 'Consolas', 'Courier New', monospace;
+            border-left: 5px solid #00adb5;
+        }
+        
+        .formula p {
+            margin: 8px 0;
+        }
+        
+        .formula strong {
+            color: #ff9800;
+        }
+        
+        .stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin: 20px 30px;
+            padding: 20px;
+            background-color: rgba(15, 52, 96, 0.2);
+            border-radius: 10px;
+            border: 1px solid rgba(0, 173, 181, 0.2);
+        }
+        
+        .stat-box {
+            flex: 1;
+            min-width: 200px;
+            background-color: rgba(34, 40, 49, 0.7);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #00adb5;
+            margin: 10px 0;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: #aaa;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            header, .instructions, .table-container, .controls, .formula-section, .stats {
+                padding: 15px;
+                margin: 15px;
+            }
+            
+            h1 {
+                font-size: 26px;
+            }
+            
+            .controls {
+                flex-direction: column;
+            }
+            
+            button {
+                width: 100%;
+            }
+            
+            .stats {
+                flex-direction: column;
+            }
+            
+            .stat-box {
+                min-width: 100%;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-calculator"></i> MGC 4K 2026 分数计算器</h1>
+            <p class="subtitle">输入分数、物量和ACC，自动计算Performance Score</p>
+            <div class="mgc-badge">MGC 4K 2026 比赛专用</div>
+        </header>
+        
+        <div class="instructions">
+            <h3><i class="fas fa-info-circle"></i> 使用说明</h3>
+            <ul>
+                <li>在表格中输入每个谱面的<strong>分数</strong>、<strong>物量</strong>和<strong>ACC</strong>（百分比，如99.5表示99.5%）</li>
+                <li>点击"计算所有"按钮或按Enter键自动计算complete值、ACC奖励和Performance Score</li>
+                <li>可以添加多个谱面数据，数据会自动保存在浏览器中</li>
+                <li>点击每行右侧的删除按钮可以删除该行数据</li>
+                <li>比赛规则：Performance Score = complete值 + ACC奖励值</li>
+            </ul>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-box">
+                <div class="stat-label">总谱面数</div>
+                <div class="stat-value" id="totalCharts">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">平均Performance Score</div>
+                <div class="stat-value" id="avgScore">0.0000</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">最高Performance Score</div>
+                <div class="stat-value" id="maxScore">0.0000</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">总Performance Score</div>
+                <div class="stat-value" id="totalScore">0.0000</div>
+            </div>
+        </div>
+        
+        <div class="table-container">
+            <table id="scoreTable">
+                <thead>
+                    <tr>
+                        <th style="width: 60px;">#</th>
+                        <th>谱面名称</th>
+                        <th>分数</th>
+                        <th>物量</th>
+                        <th>ACC (%)</th>
+                        <th>complete值</th>
+                        <th>ACC奖励值 (%)</th>
+                        <th>Performance Score</th>
+                        <th style="width: 90px;">操作</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- 表格行将通过JavaScript动态生成 -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="controls">
+            <button class="calculate-btn" id="calculateBtn">
+                <i class="fas fa-calculator"></i> 计算所有
+            </button>
+            <button class="add-row-btn" id="addRowBtn">
+                <i class="fas fa-plus-circle"></i> 添加谱面
+            </button>
+            <button class="export-btn" id="exportBtn">
+                <i class="fas fa-file-export"></i> 导出数据
+            </button>
+            <button class="clear-btn" id="clearBtn">
+                <i class="fas fa-trash-alt"></i> 清空所有
+            </button>
+        </div>
+        
+        <div class="formula-section">
+            <h3><i class="fas fa-code"></i> 计算公式</h3>
+            <div class="formula">
+                <p><strong>complete值</strong> = 分数 ÷ (物量 × 2400)</p>
+                <p><strong>ACC奖励值</strong>（分段函数）：</p>
+                <p>0% ≤ ACC &lt; 90%：ACC奖励值 = 0%</p>
+                <p>90% ≤ ACC &lt; 95%：ACC奖励值 = 1.31% × (ACC - 90)%</p>
+                <p>95% ≤ ACC &lt; 98%：ACC奖励值 = 6.56% + 1.97% × (ACC - 95)%</p>
+                <p>98% ≤ ACC &lt; 99%：ACC奖励值 = 12.46% + 2.62% × (ACC - 98)%</p>
+                <p>99% ≤ ACC &lt; 99.5%：ACC奖励值 = 15.08% + 3.28% × (ACC - 99)%</p>
+                <p>99.5% ≤ ACC ≤ 100%：ACC奖励值 = 16.72% + 6.56% × (ACC - 99.5)%</p>
+                <p><strong>Performance Score</strong> = complete值 + ACC奖励值 ÷ 100</p>
+            </div>
+            <p style="margin-top: 15px; color: #aaa; font-size: 14px;">
+                <i class="fas fa-exclamation-circle"></i> 注意：ACC奖励值是百分比，需要除以100后再与complete值相加。
+            </p>
+        </div>
+        
+        <footer>
+            <p>© 2026 MGC 4K 比赛分数计算器 | 数据保存在本地浏览器中，不会上传到服务器</p>
+            <p style="margin-top: 5px; font-size: 13px;">比赛规则基于MGC 4K 2026官方规定</p>
+        </footer>
+    </div>
+
+    <script>
+        // 从本地存储加载数据或初始化空数据
+        let tableData = JSON.parse(localStorage.getItem('mgcScoreData')) || [
+            { chart: "谱面A", score: 2400000, noteCount: 1000, acc: 99.5 },
+            { chart: "谱面B", score: 2300000, noteCount: 800, acc: 98.2 },
+            { chart: "谱面C", score: 2200000, noteCount: 1200, acc: 96.7 }
+        ];
+        
+        // 初始化表格
+        function initTable() {
+            const tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = '';
+            
+            tableData.forEach((row, index) => {
+                const newRow = createTableRow(index, row);
+                tableBody.appendChild(newRow);
+            });
+            
+            // 计算所有行
+            calculateAllRows();
+            // 更新统计数据
+            updateStats();
+        }
+        
+        // 创建表格行
+        function createTableRow(index, data = {}) {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="row-header">${index + 1}</td>
+                <td><input type="text" class="chart-input" value="${data.chart || ''}" placeholder="输入谱面名称"></td>
+                <td><input type="number" class="score-input" value="${data.score || ''}" placeholder="分数"></td>
+                <td><input type="number" class="note-input" value="${data.noteCount || ''}" placeholder="物量"></td>
+                <td><input type="number" class="acc-input" step="0.01" min="0" max="100" value="${data.acc || ''}" placeholder="ACC%"></td>
+                <td class="output-cell complete-output">-</td>
+                <td class="output-cell acc-bonus-output">-</td>
+                <td class="output-cell performance-output result">-</td>
+                <td><button class="delete-btn" data-index="${index}"><i class="fas fa-trash"></i></button></td>
+            `;
+            
+            // 添加输入事件监听
+            const inputs = row.querySelectorAll('input');
+            inputs.forEach(input => {
+                input.addEventListener('input', () => {
+                    saveDataFromTable();
+                    // 实时计算当前行
+                    calculateRow(row);
+                    // 更新统计数据
+                    updateStats();
+                });
+            });
+            
+            // 添加删除按钮事件
+            const deleteBtn = row.querySelector('.delete-btn');
+            deleteBtn.addEventListener('click', function() {
+                const rowIndex = parseInt(this.getAttribute('data-index'));
+                tableData.splice(rowIndex, 1);
+                saveData();
+                initTable();
+            });
+            
+            return row;
+        }
+        
+        // 计算ACC奖励值
+        function calculateAccBonus(acc) {
+            // 确保acc是数值
+            acc = parseFloat(acc);
+            
+            if (isNaN(acc) || acc < 0) return 0;
+            
+            if (acc < 90) {
+                return 0;
+            } else if (acc < 95) {
+                return 1.31 * (acc - 90);
+            } else if (acc < 98) {
+                return 6.56 + 1.97 * (acc - 95);
+            } else if (acc < 99) {
+                return 12.46 + 2.62 * (acc - 98);
+            } else if (acc < 99.5) {
+                return 15.08 + 3.28 * (acc - 99);
+            } else if (acc <= 100) {
+                return 16.72 + 6.56 * (acc - 99.5);
+            } else {
+                // 超过100%的情况（理论上不应该）
+                return 16.72 + 6.56 * (100 - 99.5);
+            }
+        }
+        
+        // 计算complete值
+        function calculateComplete(score, noteCount) {
+            score = parseFloat(score);
+            noteCount = parseFloat(noteCount);
+            
+            if (isNaN(score) || isNaN(noteCount) || noteCount === 0) {
+                return 0;
+            }
+            
+            return score / (noteCount * 2400);
+        }
+        
+        // 计算单行
+        function calculateRow(row) {
+            const scoreInput = row.querySelector('.score-input').value;
+            const noteInput = row.querySelector('.note-input').value;
+            const accInput = row.querySelector('.acc-input').value;
+            
+            const completeValue = calculateComplete(scoreInput, noteInput);
+            const accBonusValue = calculateAccBonus(accInput);
+            const performanceScore = completeValue + accBonusValue / 100;
+            
+            // 更新表格显示
+            const completeOutput = row.querySelector('.complete-output');
+            const accBonusOutput = row.querySelector('.acc-bonus-output');
+            const performanceOutput = row.querySelector('.performance-output');
+            
+            if (scoreInput && noteInput && accInput) {
+                completeOutput.textContent = completeValue.toFixed(4);
+                accBonusOutput.textContent = accBonusValue.toFixed(2) + '%';
+                performanceOutput.textContent = performanceScore.toFixed(4);
+                
+                // 保存计算结果到行数据
+                const rowIndex = Array.from(row.parentNode.children).indexOf(row);
+                if (rowIndex >= 0 && tableData[rowIndex]) {
+                    tableData[rowIndex].complete = completeValue;
+                    tableData[rowIndex].accBonus = accBonusValue;
+                    tableData[rowIndex].performance = performanceScore;
+                }
+            } else {
+                completeOutput.textContent = '-';
+                accBonusOutput.textContent = '-';
+                performanceOutput.textContent = '-';
+            }
+            
+            return performanceScore;
+        }
+        
+        // 计算所有行
+        function calculateAllRows() {
+            const rows = document.querySelectorAll('#tableBody tr');
+            let totalPerformance = 0;
+            let maxPerformance = 0;
+            let validRows = 0;
+            
+            rows.forEach(row => {
+                const perf = calculateRow(row);
+                if (!isNaN(perf) && perf > 0) {
+                    totalPerformance += perf;
+                    validRows++;
+                    if (perf > maxPerformance) {
+                        maxPerformance = perf;
+                    }
+                }
+            });
+            
+            // 更新统计数据
+            updateStats();
+        }
+        
+        // 更新统计数据
+        function updateStats() {
+            const rows = document.querySelectorAll('#tableBody tr');
+            let totalPerformance = 0;
+            let maxPerformance = 0;
+            let validRows = 0;
+            
+            rows.forEach(row => {
+                const perfText = row.querySelector('.performance-output').textContent;
+                if (perfText && perfText !== '-') {
+                    const perf = parseFloat(perfText);
+                    if (!isNaN(perf)) {
+                        totalPerformance += perf;
+                        validRows++;
+                        if (perf > maxPerformance) {
+                            maxPerformance = perf;
+                        }
+                    }
+                }
+            });
+            
+            // 更新统计显示
+            document.getElementById('totalCharts').textContent = validRows;
+            document.getElementById('totalScore').textContent = totalPerformance.toFixed(4);
+            document.getElementById('maxScore').textContent = maxPerformance.toFixed(4);
+            document.getElementById('avgScore').textContent = validRows > 0 ? (totalPerformance / validRows).toFixed(4) : '0.0000';
+        }
+        
+        // 从表格中保存数据
+        function saveDataFromTable() {
+            const rows = document.querySelectorAll('#tableBody tr');
+            const newData = [];
+            
+            rows.forEach(row => {
+                const chart = row.querySelector('.chart-input').value;
+                const score = row.querySelector('.score-input').value;
+                const noteCount = row.querySelector('.note-input').value;
+                const acc = row.querySelector('.acc-input').value;
+                
+                newData.push({
+                    chart: chart || `谱面${newData.length + 1}`,
+                    score: parseFloat(score) || 0,
+                    noteCount: parseFloat(noteCount) || 0,
+                    acc: parseFloat(acc) || 0
+                });
+            });
+            
+            tableData = newData;
+            saveData();
+        }
+        
+        // 保存数据到本地存储
+        function saveData() {
+            localStorage.setItem('mgcScoreData', JSON.stringify(tableData));
+        }
+        
+        // 添加新行
+        function addNewRow() {
+            const newRowData = {
+                chart: `谱面${tableData.length + 1}`,
+                score: 0,
+                noteCount: 0,
+                acc: 0
+            };
+            
+            tableData.push(newRowData);
+            saveData();
+            initTable();
+        }
+        
+        // 导出数据
+        function exportData() {
+            calculateAllRows();
+            
+            let csvContent = "谱面名称,分数,物量,ACC(%),complete值,ACC奖励值(%),Performance Score\n";
+            
+            tableData.forEach(row => {
+                const complete = row.complete || calculateComplete(row.score, row.noteCount);
+                const accBonus = row.accBonus || calculateAccBonus(row.acc);
+                const performance = row.performance || (complete + accBonus / 100);
+                
+                csvContent += `${row.chart},${row.score},${row.noteCount},${row.acc},${complete.toFixed(4)},${accBonus.toFixed(2)}%,${performance.toFixed(4)}\n`;
+            });
+            
+            // 添加统计信息
+            csvContent += `\n统计信息\n`;
+            csvContent += `总谱面数,${document.getElementById('totalCharts').textContent}\n`;
+            csvContent += `平均Performance Score,${document.getElementById('avgScore').textContent}\n`;
+            csvContent += `最高Performance Score,${document.getElementById('maxScore').textContent}\n`;
+            csvContent += `总Performance Score,${document.getElementById('totalScore').textContent}\n`;
+            
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", `MGC_4K_2026_分数数据_${new Date().toLocaleDateString().replace(/\//g, '-')}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        
+        // 清空所有数据
+        function clearAllData() {
+            if (confirm('确定要清空所有数据吗？此操作不可撤销。')) {
+                tableData = [];
+                saveData();
+                initTable();
+            }
+        }
+        
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', function() {
+            initTable();
+            
+            // 添加事件监听
+            document.getElementById('calculateBtn').addEventListener('click', calculateAllRows);
+            document.getElementById('addRowBtn').addEventListener('click', addNewRow);
+            document.getElementById('exportBtn').addEventListener('click', exportData);
+            document.getElementById('clearBtn').addEventListener('click', clearAllData);
+            
+            // 添加键盘快捷键支持
+            document.addEventListener('keydown', function(e) {
+                // Ctrl+Enter 计算所有行
+                if (e.ctrlKey && e.key === 'Enter') {
+                    e.preventDefault();
+                    calculateAllRows();
+                }
+                
+                // Ctrl+N 添加新行
+                if (e.ctrlKey && e.key === 'n') {
+                    e.preventDefault();
+                    addNewRow();
+                }
+                
+                // Ctrl+E 导出数据
+                if (e.ctrlKey && e.key === 'e') {
+                    e.preventDefault();
+                    exportData();
+                }
+            });
+            
+            // 添加输入框的Enter键支持
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && e.target.tagName === 'INPUT') {
+                    // 找到当前行并计算
+                    const row = e.target.closest('tr');
+                    if (row) {
+                        calculateRow(row);
+                        updateStats();
+                    }
+                }
+            });
+            
+            // 页面加载时计算一次统计数据
+            updateStats();
+        });
+    </script>
+</body>
+</html>
